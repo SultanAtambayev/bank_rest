@@ -9,7 +9,7 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/bank_db   # название БД
+    url: jdbc:postgresql://localhost:5433/bank_db   # название БД
     username: postgres                               # юзер PostgreSQL
     password: postgres                               # пароль PostgreSQL
 
