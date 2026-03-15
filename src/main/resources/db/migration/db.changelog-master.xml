@@ -22,4 +22,7 @@
         </createTable>
     </changeSet>
 
+
+    <include file="db.changelog-2-add-email-column.xml"/>
+
 </databaseChangeLog>
