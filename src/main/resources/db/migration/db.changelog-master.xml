@@ -23,6 +23,6 @@
     </changeSet>
 
 
-    <include file="db.changelog-2-add-email-column.xml"/>
+    <include file="db/migration/db.changelog-2-add-email-column.xml"/>
 
 </databaseChangeLog>
