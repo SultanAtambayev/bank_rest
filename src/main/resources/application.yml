@@ -6,3 +6,30 @@
   - Указать порт приложения.
   - Настроить параметры безопасности и JWT.
   - Включить Swagger UI.
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bank_db   # название БД
+    username: postgres                               # юзер PostgreSQL
+    password: postgres                               # пароль PostgreSQL
+
+  jpa:
+    hibernate:
+      ddl-auto: validate                             # проверяет структуру БД
+    show-sql: true
+
+  liquibase:
+    change-log: classpath:db/migration/db.changelog-master.xml  # путь к файлу миграций
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v1/api-docs                               # путь для OpenAPI JSON
+  swagger-ui:
+    path: /swagger-ui.html                            # путь для Swagger UI
+
+jwt:
+  secret: my-super-secret-key
+  expiration: 3600000
