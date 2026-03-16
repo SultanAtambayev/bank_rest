@@ -1,0 +1,3 @@
+com\example\bankcards\BankRestApplication.class
+com\example\bankcards\entity\User.class
+com\example\bankcards\repository\UserRepository.class
