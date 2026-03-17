@@ -18,15 +18,9 @@ public class UserService {
     }
 
     // Метод для регистрации нового пользователя
-    public User registerUser(String username, String password, String email) throws Exception {
-        if (userRepository.findByUsername(username).isPresent()) {
-            throw new Exception("Username already exists");
-        }
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new Exception("Email already exists");
-        }
+    public User registerUser(User user) {
+        user.setRole("ROLE_USER");
 
-        User user = new User(username, password, email);
         return userRepository.save(user);
     }
 
