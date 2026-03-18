@@ -15,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate                             # проверяет структуру БД
+      ddl-auto: update                             # проверяет структуру БД
     show-sql: true
 
   liquibase:
