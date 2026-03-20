@@ -36,14 +36,16 @@ public class UserController {
     @PostMapping("/login")
     public String loginUser(@RequestParam String username,
                             @RequestParam String password) throws Exception {
+        // Ищем пользователя в базе
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Проверяем пароль
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
 
-        // Генерация JWT
+        // ===== Генерация JWT через новый JwtUtil =====
         return jwtUtils.generateToken(user.getUsername(), user.getRole());
     }
 }

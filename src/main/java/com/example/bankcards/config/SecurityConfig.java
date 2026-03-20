@@ -18,20 +18,34 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register").permitAll() // регистрация доступна всем
-                        .requestMatchers("/swagger-ui.html", "/v1/api-docs/**").permitAll() // Swagger
-                        .requestMatchers("/api/cards/**").hasAnyRole("USER", "ADMIN") // доступ к картам по ролям
+                        .anyRequest().permitAll()  // все запросы разрешены для теста
+                );
+        return http.build();
+    }
+
+    /*@Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        // Доступ без токена
+                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v1/api-docs/**").permitAll()
+                        // Доступ только для авторизованных с ролью USER или ADMIN
+                        .requestMatchers("/api/cards/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
+                // Добавляем фильтр JWT перед стандартной аутентификацией
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
+    }  */
 
     @Bean
     public PasswordEncoder passwordEncoder() {

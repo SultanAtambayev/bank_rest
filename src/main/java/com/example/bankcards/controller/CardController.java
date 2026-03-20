@@ -1,10 +1,12 @@
 package com.example.bankcards.controller;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import com.example.bankcards.dto.CardRequest;
 import com.example.bankcards.dto.CardResponse;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.service.CardService;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
 
@@ -19,6 +21,7 @@ public class CardController {
     }
 
     @PostMapping
+    @Operation(summary = "Создание новой карты")
     public CardResponse createCard(@RequestBody CardRequest request) {
         return cardService.createCard(request);
     }
@@ -31,4 +34,5 @@ public class CardController {
                 .map(CardResponse::new)
                 .toList();
     }
+
 }

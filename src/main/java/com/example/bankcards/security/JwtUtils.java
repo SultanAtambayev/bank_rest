@@ -1,53 +1,74 @@
 package com.example.bankcards.security;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtUtils {
 
-    private final String jwtSecret = "my-super-secret-key"; // из application.yml
-    private final long jwtExpirationMs = 3600000; // 1 час
+    @Value("${jwt.secret}")
+    private String secret;
 
-    // Генерация токена
+    @Value("${jwt.expiration}")
+    private long jwtExpirationMs;
+
+    // Генерация JWT
     public String generateToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // Получение username из токена
-    public String getUsernameFromJwt(String token) {
-        return parseClaims(token).getSubject();
+    // Получаем Key из строки напрямую
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Получение роли из токена
-    public String getRoleFromJwt(String token) {
-        return parseClaims(token).get("role", String.class);
-    }
-
-    // Проверка валидности токена
+    // Парсинг и проверка токена
     public boolean validateJwtToken(String token) {
         try {
-            parseClaims(token);
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
+        } catch (JwtException e) {
+            // любая ошибка токена
             return false;
         }
     }
 
-    private Claims parseClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtSecret)
+    public String getUsernameFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
-                .getBody();
+                .getBody()
+                .getSubject();
+    }
+
+    public String getUsernameFromJwt(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    public String getRoleFromJwt(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
     }
 }

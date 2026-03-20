@@ -1,17 +1,32 @@
 package com.example.bankcards.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+
+@Schema(description = "Запрос на создание карты")
 public class CardRequest {
 
-    private Long userId;           // Владелец карты
-    private String cardNumber;     // Номер карты
-    private LocalDate expiryDate;  // Срок действия
-    private String status;         // Статус: ACTIVE, BLOCKED, EXPIRED
-    private BigDecimal balance;    // Баланс
 
-    // ===== геттеры и сеттеры =====
+
+    @Schema(description = "ID владельца карты", example = "1", required = true)
+    private Long userId;
+
+    @Schema(description = "Номер карты", example = "1234567812345678", required = true)
+    private String cardNumber;
+
+    @Schema(description = "Срок действия карты", example = "2026-12-31", type = "string", format = "date")
+    private LocalDate expiryDate;
+
+    @Schema(description = "Статус карты: ACTIVE, BLOCKED, EXPIRED", example = "ACTIVE", required = true)
+    private String status;
+
+    @Schema(description = "Баланс карты", example = "1000.50", required = true)
+    private BigDecimal balance;
+
+    // ===== геттеры/сеттеры =====
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
