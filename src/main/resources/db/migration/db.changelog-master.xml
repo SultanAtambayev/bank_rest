@@ -22,7 +22,6 @@
         </createTable>
     </changeSet>
 
-
     <include file="db/migration/db.changelog-2-add-email-column.xml"/>
 
 </databaseChangeLog>

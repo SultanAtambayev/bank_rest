@@ -19,7 +19,7 @@ public class SecurityConfig {
     }
 
 
-    @Bean
+    /*@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -27,25 +27,26 @@ public class SecurityConfig {
                         .anyRequest().permitAll()  // все запросы разрешены для теста
                 );
         return http.build();
-    }
+    }*/
 
-    /*@Bean
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Доступ без токена
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v1/api-docs/**").permitAll()
-                        // Доступ только для авторизованных с ролью USER или ADMIN
-                        .requestMatchers("/api/cards/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers("/swagger-ui/**", "/v1/api-docs/**", "/swagger-ui.html").permitAll()
+                        // Админские эндпоинты
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // Доступ для авторизованных с ролью USER или ADMIN
+                        .requestMatchers("/api/cards/**", "/api/transfers/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
-                // Добавляем фильтр JWT перед стандартной аутентификацией
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }  */
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

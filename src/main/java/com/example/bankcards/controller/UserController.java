@@ -1,14 +1,21 @@
 package com.example.bankcards.controller;
 
+import com.example.bankcards.dto.AuthResponse;
+import com.example.bankcards.dto.LoginRequest;
+import com.example.bankcards.dto.RegisterRequest;
 import com.example.bankcards.entity.User;
-import com.example.bankcards.service.UserService;
 import com.example.bankcards.security.JwtUtils;
+import com.example.bankcards.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Аутентификация", description = "Регистрация и вход в систему")
 public class UserController {
 
     private final UserService userService;
@@ -24,29 +31,31 @@ public class UserController {
         this.jwtUtils = jwtUtils;
     }
 
-    // ===== Регистрация нового пользователя =====
     @PostMapping("/register")
-    public User registerUser(@RequestParam String username,
-                             @RequestParam String password,
-                             @RequestParam String email) throws Exception {
-        return userService.registerUser(username, password, email);
+    @Operation(summary = "Регистрация нового пользователя")
+    public AuthResponse registerUser(@Valid @RequestBody RegisterRequest request) {
+        User user = userService.registerUser(
+                request.getUsername(),
+                request.getPassword(),
+                request.getEmail()
+        );
+
+        String token = jwtUtils.generateToken(user.getUsername(), user.getRole());
+        return new AuthResponse(token, user.getUsername(), user.getRole());
     }
 
-    // ===== Логин пользователя =====
     @PostMapping("/login")
-    public String loginUser(@RequestParam String username,
-                            @RequestParam String password) throws Exception {
-        // Ищем пользователя в базе
-        User user = userService.findByUsername(username)
+    @Operation(summary = "Вход в систему")
+    public AuthResponse loginUser(@Valid @RequestBody LoginRequest request) {
+        User user = userService.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Проверяем пароль
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
 
-        // ===== Генерация JWT через новый JwtUtil =====
-        return jwtUtils.generateToken(user.getUsername(), user.getRole());
+        String token = jwtUtils.generateToken(user.getUsername(), user.getRole());
+        return new AuthResponse(token, user.getUsername(), user.getRole());
     }
 }
 

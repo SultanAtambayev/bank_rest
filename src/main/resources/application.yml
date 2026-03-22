@@ -31,5 +31,8 @@ springdoc:
     path: /swagger-ui.html                            # путь для Swagger UI
 
 jwt:
-  secret: my-super-secret-key-that-is-long-enough-for-hs256
+  secret: bXlTZWNyZXRLZXlXaGljaElzQXRMZWFzdDMyQnl0ZXNMb25nQW5kU2VjdXJlMTIz
   expiration: 3600000
+
+encryption:
+  key: MySecretKey16Byte  # 16 байт для AES-128

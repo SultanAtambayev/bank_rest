@@ -1,1 +1,138 @@
 # Здесь будет OpenAPI описание всех доступных эндпоинтов и моделей данных.
+openapi: 3.0.1
+info:
+  title: Bank Cards Management API
+  description: REST API для управления банковскими картами
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Development server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /api/users/register:
+    post:
+      summary: Регистрация нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: john_doe
+                email:
+                  type: string
+                  example: john@example.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        '200':
+          description: Успешная регистрация
+  /api/users/login:
+    post:
+      summary: Вход в систему
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Успешный вход
+  /api/cards:
+    post:
+      summary: Создание карты
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cardNumber:
+                  type: string
+                  example: "1234567812345678"
+                expiryDate:
+                  type: string
+                  format: date
+                  example: "2026-12-31"
+                status:
+                  type: string
+                  enum: [ACTIVE, BLOCKED, EXPIRED]
+                balance:
+                  type: number
+                  example: 1000.50
+      responses:
+        '200':
+          description: Карта создана
+  /api/cards/user/{userId}:
+    get:
+      summary: Получить карты пользователя (с пагинацией)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Список карт
+  /api/transfers:
+    post:
+      summary: Перевод между своими картами
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fromCardId:
+                  type: integer
+                toCardId:
+                  type: integer
+                amount:
+                  type: number
+      responses:
+        '200':
+          description: Перевод выполнен
+  /api/admin/users:
+    get:
+      summary: Получить всех пользователей (только админ)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список пользователей

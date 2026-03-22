@@ -1,5 +1,7 @@
 package com.example.bankcards.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,11 +9,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -25,35 +28,46 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
-
-        String path = request.getRequestURI();
-
-        // Разрешаем доступ без токена для login и register
-        if (path.contains("/api/users/login") || path.contains("/api/users/register") ||
-                path.contains("/swagger-ui") || path.contains("/v1/api-docs")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
+        // Логируем заголовок для отладки
+        System.out.println("=== AUTH HEADER: " + authHeader + " ===");
+
+        String token = null;
+        String username = null;
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            if (jwtUtils.validateJwtToken(token)) {
-                String username = jwtUtils.getUsernameFromJwt(token);
-                String role = jwtUtils.getRoleFromJwt(token); // ROLE_USER или ROLE_ADMIN
+            token = authHeader.substring(7);
+            System.out.println("=== TOKEN EXTRACTED: " + token.substring(0, Math.min(50, token.length())) + "... ===");
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                username,
-                                null,
-                                List.of(new SimpleGrantedAuthority(role))
-                        );
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                username = jwtUtils.getUsernameFromToken(token);
+                System.out.println("=== USERNAME FROM TOKEN: " + username + " ===");
+            } catch (Exception e) {
+                System.out.println("=== JWT ERROR: " + e.getMessage() + " ===");
+                logger.error("JWT невалиден", e);
             }
+        } else {
+            System.out.println("=== NO BEARER TOKEN FOUND ===");
+        }
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            String role = jwtUtils.getRoleFromToken(token);
+            System.out.println("=== ROLE FROM TOKEN: " + role + " ===");
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            Collections.singletonList(new SimpleGrantedAuthority(role))
+                    );
+
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            System.out.println("=== AUTHENTICATION SET FOR USER: " + username + " ===");
         }
 
         filterChain.doFilter(request, response);

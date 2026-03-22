@@ -12,29 +12,30 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Номер карты (будем потом шифровать)
     @Column(nullable = false, unique = true)
-    private String cardNumber;
+    private String cardNumber;  // В БД хранится в зашифрованном виде
 
-    // Владелец
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User owner;
 
-    // Срок действия
     private LocalDate expiryDate;
-
-    // Статус
-    private String status; // ACTIVE, BLOCKED, EXPIRED
-
-    // Баланс
+    private String status;
     private BigDecimal balance;
 
-    // ===== геттеры/сеттеры =====
+    // Вспомогательное поле для хранения расшифрованного номера (не маппится в БД)
+    @Transient
+    private String plainCardNumber;
+
+    // Геттеры и сеттеры
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getCardNumber() { return cardNumber; }
     public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
+
+    public String getPlainCardNumber() { return plainCardNumber; }
+    public void setPlainCardNumber(String plainCardNumber) { this.plainCardNumber = plainCardNumber; }
 
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }
